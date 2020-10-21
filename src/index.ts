@@ -1,6 +1,8 @@
 // Internal
-import { Thread } from './internal/Thread';
+import { CoordinatorThread } from './internal/CoordinatorThread';
+import { WorkerThread } from './internal/WorkerThread';
 
+// Task scheduler which can spread tasks across multiple frames
 // SharedArrayBuffer
 // Semaphore
 // WebWorkers
@@ -17,7 +19,8 @@ export class Scheduler {
   private sharedBuffer: SharedArrayBuffer;
   private sharedBufferArray: Uint32Array;
   private threadCount: number;
-  private threads: Thread[];
+  private coordinatorThread = new CoordinatorThread();
+  private workerThreads: WorkerThread[];
 
   constructor(bufferSize: number, threadCount?: number) {
     if (!(bufferSize > 0)) {
@@ -28,11 +31,15 @@ export class Scheduler {
     bufferSize = align32Bits(bufferSize);
 
     this.threadCount =
-      threadCount || Math.min(Math.max(navigator.hardwareConcurrency, 2), 4);
+      threadCount ||
+      Math.min(Math.max(navigator.hardwareConcurrency - 1, 2), 3);
     this.sharedBuffer = new SharedArrayBuffer(
       Uint32Array.BYTES_PER_ELEMENT * bufferSize
     );
     this.sharedBufferArray = new Uint32Array(this.sharedBuffer);
-    this.threads = [...Array(this.threadCount)].map(() => new Thread());
+
+    this.workerThreads = [...Array(this.threadCount)].map(
+      () => new WorkerThread()
+    );
   }
 }
