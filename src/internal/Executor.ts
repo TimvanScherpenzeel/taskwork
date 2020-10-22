@@ -1,5 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+// Make sure string arguments are kept as strings
+export const sanitize = (args: any[]) =>
+  args.map((m: unknown) => (typeof m === 'string' ? JSON.stringify(m) : m));
+
 /**
  * A re-usable thread implementation based on https://github.com/developit/greenlet and https://github.com/developit/task-worklet
  */
@@ -13,7 +17,7 @@ export class Executor {
           `(${() => {
             self.onmessage = (e: MessageEvent) => {
               if (e.data[0] === 'ping') {
-                setTimeout(() => (self as any).postMessage(['pong']), 1000);
+                setTimeout(() => (self as any).postMessage(['pong']), 2500);
               } else {
                 Promise.resolve(
                   Function(`return(${e.data[1]})(${e.data[2]})`)()
@@ -68,13 +72,7 @@ export class Executor {
       const fn = args.shift();
 
       this.worker?.postMessage(
-        [
-          this.taskId,
-          fn.toString(),
-          args.map((m: unknown) =>
-            typeof m === 'string' ? JSON.stringify(m) : m
-          ),
-        ],
+        [this.taskId, fn.toString(), sanitize(args)],
         [args].filter(
           (x: unknown) =>
             x instanceof ArrayBuffer ||

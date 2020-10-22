@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 // Internal
+import { Executor, sanitize } from './internal/Executor';
 import { PriorityQueue } from './internal/PriorityQueue';
-import { Executor } from './internal/Executor';
 
 // Task scheduler which can spread tasks across multiple frames
 // SharedArrayBuffer
@@ -13,34 +15,106 @@ import { Executor } from './internal/Executor';
 
 // lock() / release() like Mutex locks
 
-const align32Bits = (v: number) => (v & 0xffffffffffffc) + (v & 0x3 ? 0x4 : 0);
+export type PriorityLevel =
+  | Priorities.NoPriority
+  | Priorities.ImmediatePriority
+  | Priorities.UserBlockingPriority
+  | Priorities.NormalPriority
+  | Priorities.LowPriority
+  | Priorities.IdlePriority;
+
+export enum Priorities {
+  NoPriority,
+  ImmediatePriority,
+  UserBlockingPriority,
+  NormalPriority,
+  LowPriority,
+  IdlePriority,
+}
 
 export class Scheduler {
-  private sharedBuffer: SharedArrayBuffer;
-  private sharedBufferArray: Uint32Array;
+  private taskId = 0;
+  private taskPromises: any = {};
+  private deferScheduled = false;
+  private frameTarget: number;
+  private executors: { id: number; executor: Executor; isActive: boolean }[];
+  private priorityQueue = new PriorityQueue();
   private threadCount: number;
-  private executors: Executor[];
-  private queue = new PriorityQueue();
 
-  constructor(bufferSize: number, threadCount?: number) {
-    if (!(bufferSize > 0)) {
-      throw new RangeError('bufferSize must be a positive number');
-    }
+  constructor({
+    frameTarget = 60,
+    threadCount = Math.min(Math.max(navigator.hardwareConcurrency - 1, 2), 4),
+  }: {
+    frameTarget?: number;
+    threadCount?: number;
+  }) {
+    this.frameTarget = frameTarget;
+    this.threadCount = threadCount;
+    this.executors = [...Array(this.threadCount)].map((_, index) => ({
+      executor: new Executor(),
+      id: 1 + index,
+      isActive: false,
+    }));
 
-    // Align to 32-bits
-    bufferSize = align32Bits(bufferSize);
-
-    this.threadCount =
-      threadCount ||
-      Math.min(Math.max(navigator.hardwareConcurrency - 1, 2), 4);
-    this.sharedBuffer = new SharedArrayBuffer(
-      Uint32Array.BYTES_PER_ELEMENT * bufferSize
-    );
-    this.sharedBufferArray = new Uint32Array(this.sharedBuffer);
-    this.executors = [...Array(this.threadCount)].map(() => new Executor());
+    this.deferTasks();
   }
 
-  run(priority: number, data: unknown) {
-    this.queue.push(priority, data);
+  public addTask(priority: PriorityLevel, task: unknown, args: unknown[]) {
+    return new Promise((resolve, reject) => {
+      this.taskPromises[++this.taskId] = [resolve, reject];
+      this.priorityQueue.push(priority, [task, sanitize(args)]);
+    });
+  }
+
+  private deferTasks() {
+    if (!this.deferScheduled) {
+      this.deferScheduled = true;
+      window.requestAnimationFrame(this.runTasks.bind(this));
+    }
+  }
+
+  private runTasks() {
+    const timeRan = performance.now();
+
+    while (true) {
+      if (
+        this.priorityQueue.length === 0 ||
+        performance.now() - timeRan > 1000 / this.frameTarget
+      ) {
+        break;
+      } else {
+        const task = this.priorityQueue.pop();
+
+        const { executor, id } =
+          this.executors.find(({ isActive }) => isActive === false) || {};
+
+        if (executor === undefined || id === undefined) {
+          break;
+        }
+
+        if (task) {
+          this.executors[id].isActive = true;
+
+          executor
+            .run(task[0], task[1])
+            .then((response) => {
+              this.executors[id].isActive = false;
+              this.taskPromises[this.taskId][0](response);
+              delete this.taskPromises[this.taskId];
+            })
+            .catch((err) => {
+              this.executors[id].isActive = false;
+              console.error(err);
+              delete this.taskPromises[this.taskId];
+            });
+        }
+      }
+    }
+
+    this.deferScheduled = false;
+
+    if (this.priorityQueue.length > 0) {
+      this.deferTasks();
+    }
   }
 }

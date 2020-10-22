@@ -3,14 +3,14 @@ import { Heap } from '@thi.ng/heaps';
 
 interface Entry {
   priority: number;
-  data: unknown;
+  data: unknown[];
 }
 
 /**
  * A priority queue implementation based on https://github.com/thi-ng/umbrella/blob/develop/packages/heaps/src/heap.ts
  */
 export class PriorityQueue {
-  private map: Map<number, unknown> = new Map();
+  private map: Map<number, unknown[]> = new Map();
   private heap: Heap<number> = new Heap<number>();
 
   constructor(entries?: Entry[]) {
@@ -19,11 +19,15 @@ export class PriorityQueue {
     }
   }
 
+  get length() {
+    return this.heap.length;
+  }
+
   public into(entries: Entry[]) {
     entries.forEach(({ priority, data }) => this.push(priority, data));
   }
 
-  public push(priority: number, data: unknown) {
+  public push(priority: number, data: unknown[]) {
     this.map.set(priority, data);
     this.heap.push(priority);
   }
