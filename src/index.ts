@@ -4,17 +4,6 @@
 import { Executor, sanitize } from './internal/Executor';
 import { PriorityQueue } from './internal/PriorityQueue';
 
-// Task scheduler which can spread tasks across multiple frames
-// SharedArrayBuffer
-// Semaphore
-// WebWorkers
-// Atomic
-
-// wait()
-// post() / signal()
-
-// lock() / release() like Mutex locks
-
 export type PriorityLevel =
   | Priorities.NoPriority
   | Priorities.ImmediatePriority
@@ -37,7 +26,11 @@ export class Scheduler {
   private taskPromises: any = {};
   private deferScheduled = false;
   private frameTarget: number;
-  private executors: { id: number; executor: Executor; isActive: boolean }[];
+  private executors: {
+    executorId: number;
+    executor: Executor;
+    isActive: boolean;
+  }[];
   private priorityQueue = new PriorityQueue();
   private threadCount: number;
 
@@ -48,13 +41,15 @@ export class Scheduler {
     frameTarget?: number;
     threadCount?: number;
   }) {
-    this.frameTarget = frameTarget;
+    this.frameTarget = 1000 / frameTarget;
     this.threadCount = threadCount;
     this.executors = [...Array(this.threadCount)].map((_, index) => ({
       executor: new Executor(),
-      id: 1 + index,
+      executorId: 1 + index,
       isActive: false,
     }));
+
+    this.runTasks = this.runTasks.bind(this);
 
     this.deferTasks();
   }
@@ -69,7 +64,7 @@ export class Scheduler {
   private deferTasks() {
     if (!this.deferScheduled) {
       this.deferScheduled = true;
-      window.requestAnimationFrame(this.runTasks.bind(this));
+      window.requestAnimationFrame(this.runTasks);
     }
   }
 
@@ -79,32 +74,33 @@ export class Scheduler {
     while (true) {
       if (
         this.priorityQueue.length === 0 ||
-        performance.now() - timeRan > 1000 / this.frameTarget
+        performance.now() - timeRan > this.frameTarget
       ) {
         break;
       } else {
-        const task = this.priorityQueue.pop();
-
-        const { executor, id } =
+        const { executor, executorId } =
           this.executors.find(({ isActive }) => isActive === false) || {};
 
-        if (executor === undefined || id === undefined) {
+        if (executor === undefined || executorId === undefined) {
           break;
         }
 
+        const task = this.priorityQueue.pop();
+
         if (task) {
-          this.executors[id].isActive = true;
+          this.executors[executorId].isActive = true;
 
           executor
             .run(task[0], task[1])
             .then((response) => {
-              this.executors[id].isActive = false;
               this.taskPromises[this.taskId][0](response);
-              delete this.taskPromises[this.taskId];
             })
             .catch((err) => {
-              this.executors[id].isActive = false;
               console.error(err);
+              this.taskPromises[this.taskId][1](err);
+            })
+            .finally(() => {
+              this.executors[executorId].isActive = false;
               delete this.taskPromises[this.taskId];
             });
         }
