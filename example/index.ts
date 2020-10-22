@@ -2,7 +2,8 @@ import { Priorities, Scheduler } from '../src';
 
 const scheduler = new Scheduler();
 
-const getUser = async (username: string) => {
+const getUser = async (username: string, buffer: SharedArrayBuffer) => {
+  console.log(buffer);
   const url = `https://api.github.com/users/${username}`;
   const res = await fetch(url);
   const profile = await res.json();

@@ -5,13 +5,17 @@ export class Profiler {
 
   public end(markName: string) {
     performance.mark(`${markName}-end`);
+    performance.measure(
+      `${markName}-measure`,
+      `${markName}-start`,
+      `${markName}-end`
+    );
 
-    performance.measure(`${markName}`, `${markName}-start`, `${markName}-end`);
-
-    const entries = performance.getEntriesByType('measure');
-
-    for (const entry of entries) {
+    performance.getEntriesByType('measure').forEach((entry) => {
       console.table(entry.toJSON());
-    }
+    });
+
+    performance.clearMarks(markName);
+    performance.clearMeasures(`${markName}-measure`);
   }
 }
