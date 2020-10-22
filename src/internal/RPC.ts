@@ -7,7 +7,7 @@ export const sanitize = (args: any[]) =>
 /**
  * A re-usable thread implementation based on https://github.com/developit/greenlet and https://github.com/developit/task-worklet
  */
-export class Executor {
+export class RPC {
   private taskId = 0;
   private taskPromises: any = {};
   private worker: Worker | null = new Worker(

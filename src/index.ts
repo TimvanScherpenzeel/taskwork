@@ -1,24 +1,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 // Internal
-import { Executor, sanitize } from './internal/Executor';
+import { RPC, sanitize } from './internal/RPC';
 import { PriorityQueue } from './internal/PriorityQueue';
 
 export type PriorityLevel =
-  | Priorities.NoPriority
   | Priorities.ImmediatePriority
-  | Priorities.UserBlockingPriority
+  | Priorities.HighPriority
   | Priorities.NormalPriority
-  | Priorities.LowPriority
-  | Priorities.IdlePriority;
+  | Priorities.LowPriority;
 
 export enum Priorities {
-  NoPriority,
   ImmediatePriority,
-  UserBlockingPriority,
+  HighPriority,
   NormalPriority,
   LowPriority,
-  IdlePriority,
 }
 
 export class Scheduler {
@@ -28,7 +24,7 @@ export class Scheduler {
   private frameTarget: number;
   private executors: {
     executorId: number;
-    executor: Executor;
+    executor: RPC;
     isActive: boolean;
   }[];
   private priorityQueue = new PriorityQueue();
@@ -36,7 +32,7 @@ export class Scheduler {
 
   constructor({
     frameTarget = 60,
-    threadCount = Math.min(Math.max(navigator.hardwareConcurrency - 1, 2), 4),
+    threadCount = Math.min(Math.max(navigator?.hardwareConcurrency - 1, 2), 4),
   }: {
     frameTarget?: number;
     threadCount?: number;
@@ -44,7 +40,7 @@ export class Scheduler {
     this.frameTarget = 1000 / frameTarget;
     this.threadCount = threadCount;
     this.executors = [...Array(this.threadCount)].map((_, index) => ({
-      executor: new Executor(),
+      executor: new RPC(),
       executorId: 1 + index,
       isActive: false,
     }));
@@ -64,7 +60,7 @@ export class Scheduler {
   private deferTasks() {
     if (!this.deferScheduled) {
       this.deferScheduled = true;
-      window.requestAnimationFrame(this.runTasks);
+      window?.requestAnimationFrame(this.runTasks);
     }
   }
 
