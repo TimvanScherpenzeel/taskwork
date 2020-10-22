@@ -32,7 +32,9 @@
     "build": "rollup -c rollup/config.lib.js",
     "example": "rollup -w -c rollup/config.dev.ts"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@thi.ng/heaps": "^1.2.25"
+  },
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^9.0.0",
     "@types/jest": "^26.0.14",

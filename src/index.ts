@@ -1,6 +1,6 @@
 // Internal
-import { CoordinatorThread } from './internal/CoordinatorThread';
-import { WorkerThread } from './internal/WorkerThread';
+import { PriorityQueue } from './internal/PriorityQueue';
+import { Executor } from './internal/Executor';
 
 // Task scheduler which can spread tasks across multiple frames
 // SharedArrayBuffer
@@ -19,8 +19,8 @@ export class Scheduler {
   private sharedBuffer: SharedArrayBuffer;
   private sharedBufferArray: Uint32Array;
   private threadCount: number;
-  private coordinatorThread = new CoordinatorThread();
-  private workerThreads: WorkerThread[];
+  private executors: Executor[];
+  private queue = new PriorityQueue();
 
   constructor(bufferSize: number, threadCount?: number) {
     if (!(bufferSize > 0)) {
@@ -32,14 +32,15 @@ export class Scheduler {
 
     this.threadCount =
       threadCount ||
-      Math.min(Math.max(navigator.hardwareConcurrency - 1, 2), 3);
+      Math.min(Math.max(navigator.hardwareConcurrency - 1, 2), 4);
     this.sharedBuffer = new SharedArrayBuffer(
       Uint32Array.BYTES_PER_ELEMENT * bufferSize
     );
     this.sharedBufferArray = new Uint32Array(this.sharedBuffer);
+    this.executors = [...Array(this.threadCount)].map(() => new Executor());
+  }
 
-    this.workerThreads = [...Array(this.threadCount)].map(
-      () => new WorkerThread()
-    );
+  run(priority: number, data: unknown) {
+    this.queue.push(priority, data);
   }
 }

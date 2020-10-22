@@ -3,30 +3,36 @@
 /**
  * A re-usable thread implementation based on https://github.com/developit/greenlet and https://github.com/developit/task-worklet
  */
-export class WorkerThread {
+export class Executor {
   private taskId = 0;
-  private promises: any = {};
+  private taskPromises: any = {};
   private worker: Worker | null = new Worker(
     URL.createObjectURL(
       new Blob(
         [
           `(${() => {
             self.onmessage = (e: MessageEvent) => {
-              Promise.resolve(Function(`return(${e.data[1]})(${e.data[2]})`)())
-                .then((r) => {
-                  (self as any).postMessage(
-                    ['r', r, e.data[0], 0],
-                    [r].filter(
-                      (x: unknown) =>
-                        x instanceof ArrayBuffer ||
-                        x instanceof MessagePort ||
-                        (self.ImageBitmap && x instanceof ImageBitmap)
-                    )
-                  );
-                })
-                .catch((f) => {
-                  (self as any).postMessage(['r', f, e.data[0], 1]);
-                });
+              if (e.data[0] === 'ping') {
+                setTimeout(() => (self as any).postMessage(['pong']), 1000);
+              } else {
+                Promise.resolve(
+                  Function(`return(${e.data[1]})(${e.data[2]})`)()
+                )
+                  .then((r) => {
+                    (self as any).postMessage(
+                      ['r', r, e.data[0], 0],
+                      [r].filter(
+                        (x: unknown) =>
+                          x instanceof ArrayBuffer ||
+                          x instanceof MessagePort ||
+                          (self.ImageBitmap && x instanceof ImageBitmap)
+                      )
+                    );
+                  })
+                  .catch((f) => {
+                    (self as any).postMessage(['r', f, e.data[0], 1]);
+                  });
+              }
             };
           }})()`,
         ],
@@ -37,11 +43,18 @@ export class WorkerThread {
 
   constructor() {
     this.worker?.addEventListener('message', (e: MessageEvent) => {
-      if (e.data[0] === 'r') {
-        this.promises[e.data[2]][e.data[3]](e.data[1]);
-        delete this.promises[e.data[2]];
+      switch (e.data[0]) {
+        case 'pong':
+          this.worker?.postMessage(['ping']);
+          break;
+        case 'r':
+          this.taskPromises[e.data[2]][e.data[3]](e.data[1]);
+          delete this.taskPromises[e.data[2]];
+          break;
       }
     });
+
+    this.worker?.postMessage(['ping']);
   }
 
   public run(...args: any) {
@@ -50,7 +63,7 @@ export class WorkerThread {
     }
 
     return new Promise((resolve, reject) => {
-      this.promises[++this.taskId] = [resolve, reject];
+      this.taskPromises[++this.taskId] = [resolve, reject];
 
       const fn = args.shift();
 
