@@ -1,6 +1,6 @@
 import { Priorities, Scheduler } from '../src';
 
-const scheduler = new Scheduler({});
+const scheduler = new Scheduler();
 
 const getUser = async (username: string) => {
   const url = `https://api.github.com/users/${username}`;

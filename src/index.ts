@@ -36,12 +36,12 @@ export class Scheduler {
   }: {
     frameTarget?: number;
     threadCount?: number;
-  }) {
+  } = {}) {
     this.frameTarget = 1000 / frameTarget;
     this.threadCount = threadCount;
     this.executors = [...Array(this.threadCount)].map((_, index) => ({
       executor: new RPC(),
-      executorId: 1 + index,
+      executorId: index,
       isActive: false,
     }));
 
