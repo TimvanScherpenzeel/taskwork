@@ -2,6 +2,7 @@
 
 // Internal
 import { RPC, sanitize } from './internal/RPC';
+import { Profiler } from './internal/Profiler';
 import { PriorityQueue } from './internal/PriorityQueue';
 
 export type PriorityLevel =
@@ -25,24 +26,31 @@ export class Scheduler {
   private executors: {
     executorId: number;
     executor: RPC;
-    isActive: boolean;
+    isRunning: boolean;
   }[];
+  private profiler = new Profiler();
   private priorityQueue = new PriorityQueue();
   private threadCount: number;
+  // private sharedBuffer: SharedArrayBuffer;
+  // private sharedBufferArray: Int32Array;
 
   constructor({
     frameTarget = 60,
     threadCount = Math.min(Math.max(navigator?.hardwareConcurrency - 1, 2), 4),
-  }: {
+  }: // bufferSize = 1024,
+  {
     frameTarget?: number;
     threadCount?: number;
+    // bufferSize?: number;
   } = {}) {
     this.frameTarget = 1000 / frameTarget;
     this.threadCount = threadCount;
+    // this.sharedBuffer = new SharedArrayBuffer(bufferSize);
+    // this.sharedBufferArray = new Int32Array(this.sharedBuffer);
     this.executors = [...Array(this.threadCount)].map((_, index) => ({
       executor: new RPC(),
       executorId: index,
-      isActive: false,
+      isRunning: false,
     }));
 
     this.runTasks = this.runTasks.bind(this);
@@ -75,7 +83,7 @@ export class Scheduler {
         break;
       } else {
         const { executor, executorId } =
-          this.executors.find(({ isActive }) => isActive === false) || {};
+          this.executors.find(({ isRunning }) => isRunning === false) || {};
 
         if (executor === undefined || executorId === undefined) {
           break;
@@ -84,7 +92,8 @@ export class Scheduler {
         const task = this.priorityQueue.pop();
 
         if (task) {
-          this.executors[executorId].isActive = true;
+          this.profiler.start('executor');
+          this.executors[executorId].isRunning = true;
 
           executor
             .run(task[0], task[1])
@@ -96,8 +105,9 @@ export class Scheduler {
               this.taskPromises[this.taskId][1](err);
             })
             .finally(() => {
-              this.executors[executorId].isActive = false;
+              this.executors[executorId].isRunning = false;
               delete this.taskPromises[this.taskId];
+              this.profiler.end('executor');
             });
         }
       }
