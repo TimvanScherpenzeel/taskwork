@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 // Make sure string arguments are kept as strings
-export const sanitize = (args: any[]) =>
+export const serializeArgs = (args: any[]) =>
   args.map((m: unknown) => (typeof m === 'string' ? JSON.stringify(m) : m));
 
 /**
@@ -72,7 +72,7 @@ export class RPC {
       const fn = args.shift();
 
       this.worker?.postMessage(
-        [this.taskId, fn.toString(), sanitize(args)],
+        [this.taskId, fn.toString(), serializeArgs(args)],
         [args].filter(
           (x: unknown) =>
             x instanceof ArrayBuffer ||
