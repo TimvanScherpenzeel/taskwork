@@ -1,6 +1,6 @@
 {
   "name": "taskwork",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Efficient multi-threaded task scheduler using generic re-usable WebWorkers.",
   "author": "Tim van Scherpenzeel",
   "license": "MIT",
