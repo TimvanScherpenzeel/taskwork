@@ -1,5 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+// iOS Safari seems to wrongly GC the worker.
+// Mounting it to the global prevents that from happening.
+(self as any).$$w = {};
+
 // Make sure string arguments are kept as strings
 export const serializeArgs = (args: any[]) =>
   args.map((m: unknown) => (typeof m === 'string' ? JSON.stringify(m) : m));
@@ -45,6 +49,10 @@ export class Thread {
         delete this.taskPromises[e.data[2]];
       }
     });
+
+    // iOS Safari seems to wrongly GC the worker.
+    // Mounting it to the global prevents that from happening.
+    (self as any).$$w[this.taskId] = this.worker;
   }
 
   public run(...args: any) {
@@ -67,10 +75,5 @@ export class Thread {
         )
       );
     });
-  }
-
-  public terminate() {
-    this.worker?.terminate();
-    this.worker = null;
   }
 }

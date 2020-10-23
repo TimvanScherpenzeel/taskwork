@@ -63,10 +63,6 @@ export class Scheduler {
     });
   }
 
-  public terminate() {
-    this.executors.forEach(({ executor }) => executor.terminate());
-  }
-
   private deferTasks() {
     if (!this.deferScheduled) {
       this.deferScheduled = true;
