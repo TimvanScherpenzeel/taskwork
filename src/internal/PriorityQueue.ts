@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 // Internal
 import { BinaryHeap } from './BinaryHeap';
 
