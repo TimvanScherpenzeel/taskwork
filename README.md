@@ -1,6 +1,5 @@
 # Taskwork
 
-[![Build Status](https://travis-ci.com/TimvanScherpenzeel/taskwork.svg?branch=master)](https://travis-ci.com/TimvanScherpenzeel/taskwork)
 [![npm version](https://badge.fury.io/js/taskwork.svg)](https://badge.fury.io/js/taskwork)
 [![gzip size](https://img.badgesize.io/https:/unpkg.com/taskwork/dist/taskwork.esm.js?compression=gzip)](https://unpkg.com/taskwork)
 [![install size](https://packagephobia.now.sh/badge?p=taskwork)](https://packagephobia.now.sh/result?p=taskwork)
