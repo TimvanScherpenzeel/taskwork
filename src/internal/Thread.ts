@@ -37,11 +37,7 @@ export class Thread {
                     (self as any).postMessage(['r', f, e.data[0], 1])
                   );
               }
-            })})()`
-            // Remove comments
-            .replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '')
-            // Trim whitespace and remove newlines
-            .replace(/^ +|\r?\n|\r/gm, ''),
+            })})()`,
         ],
         { type: 'text/javascript' }
       )
