@@ -12,9 +12,9 @@ export default formats.map(
   (format): RollupOptions => ({
     input: './src/index.ts',
     output: {
-      file: `./dist/semwork.${format}.js`,
+      file: `./dist/taskwork.${format}.js`,
       format,
-      name: 'Semwork',
+      name: 'Taskwork',
     },
     plugins: [
       terser({

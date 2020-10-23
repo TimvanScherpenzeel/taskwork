@@ -1,25 +1,28 @@
 {
-  "name": "semwork",
+  "name": "taskwork",
   "version": "0.0.1",
-  "description": "A semaphore framework using SharedArrayBuffer and generic WebWorkers",
+  "description": "An RPC framework using generic WebWorkers.",
   "author": "Tim van Scherpenzeel",
   "license": "MIT",
-  "main": "dist/semwork.umd.js",
-  "module": "dist/semwork.esm.js",
+  "main": "dist/taskwork.umd.js",
+  "module": "dist/taskwork.esm.js",
   "types": "dist/index.d.ts",
-  "homepage": "https://github.com/TimvanScherpenzeel/semwork#readme",
+  "homepage": "https://github.com/TimvanScherpenzeel/taskwork#readme",
   "bugs": {
-    "url": "https://github.com/TimvanScherpenzeel/semwork/issues"
+    "url": "https://github.com/TimvanScherpenzeel/taskwork/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/TimvanScherpenzeel/semwork.git"
+    "url": "https://github.com/TimvanScherpenzeel/taskwork.git"
   },
   "files": [
     "dist"
   ],
   "keywords": [
     "worker",
+    "comlink",
+    "webworker",
+    "rpc",
     "typescript",
     "javascript"
   ],
