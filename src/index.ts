@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 // Internal
-import { RPC, serializeArgs } from './internal/RPC';
+import { Thread, serializeArgs } from './internal/Thread';
 import { PriorityQueue } from './internal/PriorityQueue';
 
 export type PriorityLevel =
@@ -24,7 +24,7 @@ export class Scheduler {
   private frameTarget: number;
   private executors: {
     executorId: number;
-    executor: RPC;
+    executor: Thread;
     isRunning: boolean;
   }[];
 
@@ -42,7 +42,7 @@ export class Scheduler {
     this.threadCount = threadCount;
 
     this.executors = [...Array(this.threadCount)].map((_, index) => ({
-      executor: new RPC(),
+      executor: new Thread(),
       executorId: index,
       isRunning: false,
     }));
@@ -94,6 +94,7 @@ export class Scheduler {
         const task = this.priorityQueue.pop();
 
         if (task) {
+          const [resolve, reject] = [0, 1];
           const [taskId, fn, args]: any[] = task;
 
           this.executors[executorId].isRunning = true;
@@ -101,11 +102,11 @@ export class Scheduler {
           executor
             .run(fn, args)
             .then((response) => {
-              this.taskPromises[taskId][0](response);
+              this.taskPromises[taskId][resolve](response);
             })
             .catch((err) => {
               console.error(err);
-              this.taskPromises[taskId][1](err);
+              this.taskPromises[taskId][reject](err);
             })
             .finally(() => {
               this.executors[executorId].isRunning = false;

@@ -7,15 +7,15 @@ export const serializeArgs = (args: any[]) =>
 /**
  * A re-usable thread implementation based on https://github.com/developit/greenlet and https://github.com/developit/task-worklet
  */
-export class RPC {
+export class Thread {
   private taskId = 0;
   private taskPromises: any = {};
   private worker: Worker | null = new Worker(
     URL.createObjectURL(
       new Blob(
         [
-          `(${() => {
-            self.onmessage = (e: MessageEvent) => {
+          `(${() =>
+            (self.onmessage = (e: MessageEvent) => {
               if (e.data[0] === 'p') {
                 setTimeout(() => (self as any).postMessage(['p']), 3000);
               } else {
@@ -33,12 +33,15 @@ export class RPC {
                       )
                     );
                   })
-                  .catch((f) => {
-                    (self as any).postMessage(['r', f, e.data[0], 1]);
-                  });
+                  .catch((f) =>
+                    (self as any).postMessage(['r', f, e.data[0], 1])
+                  );
               }
-            };
-          }})()`,
+            })})()`
+            // Remove comments
+            .replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '')
+            // Trim whitespace and remove newlines
+            .replace(/^ +|\r?\n|\r/gm, ''),
         ],
         { type: 'text/javascript' }
       )
