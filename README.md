@@ -31,7 +31,10 @@ const getUser = async (username: string) => {
   return profile.name;
 };
 
-const scheduler = new Scheduler();
+const scheduler = new Scheduler({
+  frameTarget?: number; // (Default, 60) Time available per frame to execute tasks
+  threadCount?: number; // (Default, 2 - 4 depending on CPU architecture) Amount of threads to spawn
+});
 
 async () => {
   await Promise.all([
