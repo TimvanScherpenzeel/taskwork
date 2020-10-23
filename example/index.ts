@@ -32,13 +32,13 @@ const getUser = async (username: string) => {
   // console.log(e);
 })();
 
-// import { BinaryHeap } from '../src/internal/BinaryHeap';
+// import { PriorityQueue } from '../src/internal/PriorityQueue';
 
-// const h = new BinaryHeap();
-// h.push({ priority: 5, taskId: 2 });
-// h.push({ priority: 1, taskId: 0 });
-// h.push({ priority: 2, taskId: 1 });
-// h.push({ priority: 3, taskId: 3 });
+// const h = new PriorityQueue();
+// h.push(5, 2, ['']);
+// h.push(1, 0, ['']);
+// h.push(2, 1, ['']);
+// h.push(3, 3, ['']);
 
 // console.log(h.pop()); // 5
 // console.log(h.pop()); // 10

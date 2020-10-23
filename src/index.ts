@@ -52,7 +52,7 @@ export class Scheduler {
     this.deferTasks();
   }
 
-  public addTask(priority: PriorityLevel, task: unknown, args: unknown[]) {
+  public addTask(priority: PriorityLevel, task: unknown, args?: unknown[]) {
     return new Promise((resolve, reject) => {
       this.taskPromises[++this.taskId] = [resolve, reject];
       this.priorityQueue.push(priority, this.taskId, [
@@ -90,7 +90,6 @@ export class Scheduler {
         const task = this.priorityQueue.pop();
 
         if (task) {
-          const [resolve, reject] = [0, 1];
           const [taskId, fn, args]: any[] = task;
 
           this.executors[executorId].isRunning = true;
@@ -98,11 +97,11 @@ export class Scheduler {
           executor
             .run(fn, args)
             .then((response) => {
-              this.taskPromises[taskId][resolve](response);
+              this.taskPromises[taskId][0](response);
             })
             .catch((err) => {
               console.error(err);
-              this.taskPromises[taskId][reject](err);
+              this.taskPromises[taskId][1](err);
             })
             .finally(() => {
               this.executors[executorId].isRunning = false;

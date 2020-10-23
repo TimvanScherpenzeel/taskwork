@@ -5,7 +5,7 @@
 (self as any).$$w = {};
 
 // Make sure string arguments are kept as strings
-export const serializeArgs = (args: any[]) =>
+export const serializeArgs = (args: any[] = []) =>
   args.map((m: unknown) => (typeof m === 'string' ? JSON.stringify(m) : m));
 
 /**

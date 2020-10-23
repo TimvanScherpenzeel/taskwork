@@ -7,13 +7,8 @@ type Entry = { priority: number; taskId: number };
  * A priority queue implementation based on https://github.com/thi-ng/umbrella/blob/develop/packages/heaps/src/heap.ts
  */
 export class PriorityQueue {
-  private static compare(a: number, b: number): number {
-    if (a === b) {
-      return 0;
-    }
-
-    return a < b ? -1 : a > b ? 1 : 0;
-  }
+  private static compare = (a: number, b: number) =>
+    a === b ? 0 : a < b ? -1 : a > b ? 1 : 0;
 
   private values: Entry[] = [];
   private map: Map<number, unknown[]> = new Map();
