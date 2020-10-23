@@ -1,6 +1,3 @@
-// Internal
-// import { BinaryHeap } from './BinaryHeap';
-
 type Entry = { priority: number; taskId: number };
 
 /**
