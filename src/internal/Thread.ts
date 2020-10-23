@@ -16,27 +16,21 @@ export class Thread {
         [
           `(${() =>
             (self.onmessage = (e: MessageEvent) => {
-              if (e.data[0] === 'p') {
-                setTimeout(() => (self as any).postMessage(['p']), 3000);
-              } else {
-                Promise.resolve(
-                  Function(`return(${e.data[1]})(${e.data[2]})`)()
-                )
-                  .then((r) => {
-                    (self as any).postMessage(
-                      ['r', r, e.data[0], 0],
-                      [r].filter(
-                        (x: unknown) =>
-                          x instanceof ArrayBuffer ||
-                          x instanceof MessagePort ||
-                          (self.ImageBitmap && x instanceof ImageBitmap)
-                      )
-                    );
-                  })
-                  .catch((f) =>
-                    (self as any).postMessage(['r', f, e.data[0], 1])
+              Promise.resolve(Function(`return(${e.data[1]})(${e.data[2]})`)())
+                .then((r) => {
+                  (self as any).postMessage(
+                    ['r', r, e.data[0], 0],
+                    [r].filter(
+                      (x: unknown) =>
+                        x instanceof ArrayBuffer ||
+                        x instanceof MessagePort ||
+                        (self.ImageBitmap && x instanceof ImageBitmap)
+                    )
                   );
-              }
+                })
+                .catch((f) =>
+                  (self as any).postMessage(['r', f, e.data[0], 1])
+                );
             })})()`,
         ],
         { type: 'text/javascript' }
@@ -46,18 +40,11 @@ export class Thread {
 
   constructor() {
     this.worker?.addEventListener('message', (e: MessageEvent) => {
-      switch (e.data[0]) {
-        case 'p':
-          this.worker?.postMessage(['p']);
-          break;
-        case 'r':
-          this.taskPromises[e.data[2]][e.data[3]](e.data[1]);
-          delete this.taskPromises[e.data[2]];
-          break;
+      if (e.data[0] === 'r') {
+        this.taskPromises[e.data[2]][e.data[3]](e.data[1]);
+        delete this.taskPromises[e.data[2]];
       }
     });
-
-    this.worker?.postMessage(['p']);
   }
 
   public run(...args: any) {
