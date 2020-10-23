@@ -13,7 +13,7 @@ const getUser = async (username: string) => {
 
 (async () => {
   await Promise.all([
-    scheduler.addTask(Priorities.LowPriority, getUser, ['developit']),
+    scheduler.addTask(Priorities.LowPriority, getUser, ['microsoft']),
     scheduler.addTask(Priorities.ImmediatePriority, getUser, [
       'timvanscherpenzeel',
     ]),

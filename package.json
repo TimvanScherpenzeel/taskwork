@@ -1,7 +1,7 @@
 {
   "name": "taskwork",
   "version": "0.0.1",
-  "description": "An RPC framework using generic WebWorkers.",
+  "description": "Efficient multi-threaded task scheduler using generic re-usable WebWorkers.",
   "author": "Tim van Scherpenzeel",
   "license": "MIT",
   "main": "dist/taskwork.umd.js",
@@ -19,6 +19,9 @@
     "dist"
   ],
   "keywords": [
+    "task",
+    "scheduler",
+    "multithreading",
     "worker",
     "comlink",
     "webworker",
