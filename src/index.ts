@@ -84,8 +84,7 @@ export class Scheduler {
           this.executors.find(({ isRunning }) => isRunning === false) || {};
 
         if (executor === undefined || executorId === undefined) {
-          console.error('All executors are in use');
-          break;
+          return;
         }
 
         const task = this.priorityQueue.pop();

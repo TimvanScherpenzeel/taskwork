@@ -16,8 +16,8 @@ export class RPC {
         [
           `(${() => {
             self.onmessage = (e: MessageEvent) => {
-              if (e.data[0] === 'ping') {
-                setTimeout(() => (self as any).postMessage(['pong']), 2500);
+              if (e.data[0] === 'p') {
+                setTimeout(() => (self as any).postMessage(['p']), 3000);
               } else {
                 Promise.resolve(
                   Function(`return(${e.data[1]})(${e.data[2]})`)()
@@ -48,8 +48,8 @@ export class RPC {
   constructor() {
     this.worker?.addEventListener('message', (e: MessageEvent) => {
       switch (e.data[0]) {
-        case 'pong':
-          this.worker?.postMessage(['ping']);
+        case 'p':
+          this.worker?.postMessage(['p']);
           break;
         case 'r':
           this.taskPromises[e.data[2]][e.data[3]](e.data[1]);
@@ -58,7 +58,7 @@ export class RPC {
       }
     });
 
-    this.worker?.postMessage(['ping']);
+    this.worker?.postMessage(['p']);
   }
 
   public run(...args: any) {
