@@ -55,7 +55,7 @@ export class Scheduler {
   public addTask(priority: PriorityLevel, task: unknown, args?: unknown[]) {
     return new Promise((resolve, reject) => {
       this.taskPromises[++this.taskId] = [resolve, reject];
-      this.priorityQueue.push(priority, this.taskId, [
+      this.priorityQueue.push(priority, [
         this.taskId,
         task,
         serializeArgs(args),

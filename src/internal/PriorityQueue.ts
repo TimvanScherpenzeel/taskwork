@@ -1,4 +1,5 @@
-type Entry = { priority: number; taskId: number };
+type QueueEntry = { priority: number; taskId: number };
+type StoreEntry = [taskId: number, task: unknown, args: unknown[]];
 
 /**
  * A priority queue implementation based on https://github.com/thi-ng/umbrella/blob/develop/packages/heaps/src/heap.ts
@@ -7,34 +8,33 @@ export class PriorityQueue {
   private static compare = (a: number, b: number) =>
     a === b ? 0 : a < b ? -1 : a > b ? 1 : 0;
 
-  private queue: Entry[] = [];
+  private queue: QueueEntry[] = [];
   private store: Map<number, unknown[]> = new Map();
 
   get length() {
     return this.queue.length;
   }
 
-  public push(priority: number, taskId: number, data: unknown[]) {
-    this.store.set(taskId, data);
-    this.queue.push({ priority, taskId });
+  public push(priority: number, data: StoreEntry) {
+    this.store.set(data[0], data);
+    this.queue.push({ priority, taskId: data[0] });
     this.percolateUp(this.queue.length - 1);
   }
 
   public pop() {
     const tail = this.queue.pop() || { priority: -1, taskId: -1 };
-    let result: Entry;
+    let entry: QueueEntry;
 
     if (this.queue.length > 0) {
-      result = this.queue[0];
+      entry = this.queue[0];
       this.queue[0] = tail;
       this.percolateDown(0);
     } else {
-      result = tail;
+      entry = tail;
     }
 
-    const { taskId } = result;
-    const data = this.store.get(taskId);
-    this.store.delete(taskId);
+    const data = this.store.get(entry.taskId);
+    this.store.delete(entry.taskId);
 
     return data;
   }
