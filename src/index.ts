@@ -18,17 +18,16 @@ export enum Priorities {
 }
 
 export class Scheduler {
-  private taskId = 0;
-  private taskPromises: any = {};
   private deferScheduled = false;
-  private frameTarget: number;
   private executors: {
     executorId: number;
     executor: Thread;
     isRunning: boolean;
   }[];
-
+  private frameTarget: number;
   private priorityQueue = new PriorityQueue();
+  private taskId = 0;
+  private taskPromises: any = {};
   private threadCount: number;
 
   constructor({
