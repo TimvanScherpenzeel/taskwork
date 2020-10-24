@@ -3,6 +3,7 @@
 // Internal
 import { Thread, serializeArgs } from './internal/Thread';
 import {
+  Priorities,
   PriorityLevel,
   PriorityQueue,
   StoreEntry,
@@ -10,7 +11,7 @@ import {
 
 // Types
 import { Undefinable } from './types';
-export { PriorityLevel };
+export { Priorities };
 
 export class Scheduler {
   private deferScheduled = false;
