@@ -23,11 +23,16 @@
     "scheduler",
     "multithreading",
     "worker",
+    "web worker",
     "comlink",
     "webworker",
     "rpc",
+    "thread",
+    "greenlet",
+    "worklet",
     "typescript",
-    "javascript"
+    "javascript",
+    "async"
   ],
   "scripts": {
     "start": "rollup -c rollup/config.lib.js -w",
