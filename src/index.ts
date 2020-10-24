@@ -2,7 +2,7 @@
 
 // Internal
 import { Thread, serializeArgs } from './internal/Thread';
-import { PriorityQueue } from './internal/PriorityQueue';
+import { PriorityQueue, StoreEntry } from './internal/PriorityQueue';
 
 export type PriorityLevel =
   | Priorities.ImmediatePriority
@@ -51,7 +51,7 @@ export class Scheduler {
     this.deferTasks();
   }
 
-  public addTask(priority: PriorityLevel, task: unknown, args?: unknown[]) {
+  public addTask(priority: PriorityLevel, task: any, args?: any[]) {
     return new Promise((resolve, reject) => {
       this.taskPromises[++this.taskId] = [resolve, reject];
       this.priorityQueue.push(priority, [
@@ -86,10 +86,10 @@ export class Scheduler {
           return;
         }
 
-        const task = this.priorityQueue.pop();
+        const task: StoreEntry | undefined = this.priorityQueue.pop();
 
         if (task) {
-          const [taskId, fn, args]: any[] = task;
+          const [taskId, fn, args] = task;
 
           this.executors[executorId].isRunning = true;
 

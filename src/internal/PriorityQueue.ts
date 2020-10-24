@@ -1,5 +1,5 @@
 type QueueEntry = { priority: number; taskId: number };
-type StoreEntry = [taskId: number, task: unknown, args: unknown[]];
+export type StoreEntry = [taskId: number, task: unknown, args: unknown[]];
 
 /**
  * A priority queue implementation based on https://github.com/thi-ng/umbrella/blob/develop/packages/heaps/src/heap.ts
@@ -9,7 +9,7 @@ export class PriorityQueue {
     a === b ? 0 : a < b ? -1 : a > b ? 1 : 0;
 
   private queue: QueueEntry[] = [];
-  private store: Map<number, unknown[]> = new Map();
+  private store: Map<number, StoreEntry> = new Map();
 
   get length() {
     return this.queue.length;
@@ -33,7 +33,7 @@ export class PriorityQueue {
       entry = tail;
     }
 
-    const data = this.store.get(entry.taskId);
+    const data: StoreEntry | undefined = this.store.get(entry.taskId);
     this.store.delete(entry.taskId);
 
     return data;
