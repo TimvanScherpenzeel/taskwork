@@ -1,13 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 // Internal
-import { Thread, serializeArgs } from './internal/Thread';
 import {
   Priorities,
   PriorityLevel,
   PriorityQueue,
   StoreEntry,
 } from './internal/PriorityQueue';
+import { Thread } from './internal/Thread';
+import { serializeArgs } from './internal/utilities';
 
 // Types
 import { Undefinable } from './types';

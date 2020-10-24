@@ -1,21 +1,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+// Internal
+import { serializeArgs } from './utilities';
+
 // Types
 import { Nullable } from '../types';
 
 declare global {
   interface Window {
-    $$tw: { [k: number]: Nullable<Worker> };
+    $$tw: { [k: string]: Nullable<Worker> };
   }
 }
 
 // iOS Safari seems to wrongly GC the worker.
 // Mounting it to the global prevents that from happening.
 window.$$tw = {};
-
-// Make sure string arguments are kept as strings
-export const serializeArgs = (args: any[] = []) =>
-  args.map((m: unknown) => (typeof m === 'string' ? JSON.stringify(m) : m));
 
 /**
  * A re-usable thread implementation based on https://github.com/developit/greenlet and https://github.com/developit/task-worklet
@@ -58,7 +57,9 @@ export class Thread {
 
     // iOS Safari seems to wrongly GC the worker.
     // Mounting it to the global prevents that from happening.
-    window.$$tw[this.taskId] = this.worker;
+    window.$$tw[
+      `${Math.random().toString(36).substr(2, 8)}-${this.taskId}`
+    ] = this.worker;
   }
 
   public run(...args: any) {
