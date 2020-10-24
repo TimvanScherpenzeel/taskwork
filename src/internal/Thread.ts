@@ -22,15 +22,17 @@ export const serializeArgs = (args: any[] = []) =>
  */
 export class Thread {
   private taskId = 0;
-  private taskPromises: any = {};
+  private taskPromises: {
+    [k: number]: [(value?: unknown) => void, (reason?: any) => void];
+  } = {};
   private worker: Nullable<Worker> = new Worker(
     URL.createObjectURL(
       new Blob([
         `(${() =>
-          (onmessage = (e: MessageEvent) => {
+          ((self as any).onmessage = (e: MessageEvent) => {
             Promise.resolve(Function(`return(${e.data[1]})(${e.data[2]})`)())
               .then((r) => {
-                (postMessage as any)(
+                (self as any).postMessage(
                   ['r', r, e.data[0], 0],
                   [r].filter(
                     (x: unknown) =>
@@ -40,7 +42,7 @@ export class Thread {
                   )
                 );
               })
-              .catch((f) => (postMessage as any)(['r', f, e.data[0], 1]));
+              .catch((f) => (self as any).postMessage(['r', f, e.data[0], 1]));
           })})()`,
       ])
     )

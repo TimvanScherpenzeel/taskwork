@@ -2,9 +2,10 @@
 
 // Internal
 import { Thread, serializeArgs } from './internal/Thread';
-import { PriorityQueue, StoreEntry } from './internal/PriorityQueue';
+import { PriorityQueue } from './internal/PriorityQueue';
 
 // Types
+import { StoreEntry } from './internal/PriorityQueue';
 import { Undefinable } from './types';
 
 export type PriorityLevel =
