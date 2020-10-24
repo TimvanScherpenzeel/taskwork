@@ -4,6 +4,9 @@
 import { Thread, serializeArgs } from './internal/Thread';
 import { PriorityQueue, StoreEntry } from './internal/PriorityQueue';
 
+// Types
+import { Undefinable } from './types';
+
 export type PriorityLevel =
   | Priorities.ImmediatePriority
   | Priorities.HighPriority
@@ -86,7 +89,7 @@ export class Scheduler {
           return;
         }
 
-        const task: StoreEntry | undefined = this.priorityQueue.pop();
+        const task: Undefinable<StoreEntry> = this.priorityQueue.pop();
 
         if (task) {
           const [taskId, fn, args] = task;

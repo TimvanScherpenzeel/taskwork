@@ -1,9 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 // Types
+import { Nullable } from '../types';
+
 declare global {
   interface Window {
-    $$tw: { [k: number]: Worker | null };
+    $$tw: { [k: number]: Nullable<Worker> };
   }
 }
 
@@ -21,7 +23,7 @@ export const serializeArgs = (args: any[] = []) =>
 export class Thread {
   private taskId = 0;
   private taskPromises: any = {};
-  private worker: Worker | null = new Worker(
+  private worker: Nullable<Worker> = new Worker(
     URL.createObjectURL(
       new Blob([
         `(${() =>

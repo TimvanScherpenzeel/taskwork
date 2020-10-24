@@ -1,5 +1,8 @@
 // Types
+import { Undefinable } from '../types';
+
 type QueueEntry = { priority: number; taskId: number };
+
 export type StoreEntry = [taskId: number, task: unknown, args: unknown[]];
 
 /**
@@ -34,7 +37,7 @@ export class PriorityQueue {
       entry = tail;
     }
 
-    const data: StoreEntry | undefined = this.store.get(entry.taskId);
+    const data: Undefinable<StoreEntry> = this.store.get(entry.taskId);
     this.store.delete(entry.taskId);
 
     return data;
