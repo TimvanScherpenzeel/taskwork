@@ -16,29 +16,24 @@ export class Thread {
   private taskPromises: any = {};
   private worker: Worker | null = new Worker(
     URL.createObjectURL(
-      new Blob(
-        [
-          `(${() =>
-            (self.onmessage = (e: MessageEvent) => {
-              Promise.resolve(Function(`return(${e.data[1]})(${e.data[2]})`)())
-                .then((r) => {
-                  (self as any).postMessage(
-                    ['r', r, e.data[0], 0],
-                    [r].filter(
-                      (x: unknown) =>
-                        x instanceof ArrayBuffer ||
-                        x instanceof MessagePort ||
-                        (self.ImageBitmap && x instanceof ImageBitmap)
-                    )
-                  );
-                })
-                .catch((f) =>
-                  (self as any).postMessage(['r', f, e.data[0], 1])
+      new Blob([
+        `(${() =>
+          (onmessage = (e: MessageEvent) => {
+            Promise.resolve(Function(`return(${e.data[1]})(${e.data[2]})`)())
+              .then((r) => {
+                (postMessage as any)(
+                  ['r', r, e.data[0], 0],
+                  [r].filter(
+                    (x: unknown) =>
+                      x instanceof ArrayBuffer ||
+                      x instanceof MessagePort ||
+                      (ImageBitmap && x instanceof ImageBitmap)
+                  )
                 );
-            })})()`,
-        ],
-        { type: 'text/javascript' }
-      )
+              })
+              .catch((f) => (postMessage as any)(['r', f, e.data[0], 1]));
+          })})()`,
+      ])
     )
   );
 
@@ -71,7 +66,7 @@ export class Thread {
           (x: unknown) =>
             x instanceof ArrayBuffer ||
             x instanceof MessagePort ||
-            (self.ImageBitmap && x instanceof ImageBitmap)
+            (ImageBitmap && x instanceof ImageBitmap)
         )
       );
     });
