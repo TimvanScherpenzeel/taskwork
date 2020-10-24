@@ -4,7 +4,7 @@
 [![gzip size](https://img.badgesize.io/https:/unpkg.com/taskwork/dist/taskwork.esm.js?compression=gzip)](https://unpkg.com/taskwork)
 [![install size](https://packagephobia.now.sh/badge?p=taskwork)](https://packagephobia.now.sh/result?p=taskwork)
 
-Efficient multi-threaded task scheduler using generic re-usable WebWorkers.
+Efficient multi-threaded task scheduler for the browser using generic re-usable WebWorkers.
 
 `Taskwork` is a task scheduler that is able to delegate tasks to [WebWorkers](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API). These WebWorkers are special in the sense that they are able to execute and return the results from arbitrary tasks send to them. At the start of the application a fixed amount of threads are spawned and re-used throughout the lifetime of the application. This has the advantage of paying the spawn-cost of WebWorkers (`~45 ms`) and the overhead of spawning only once.
 
@@ -13,6 +13,8 @@ Another feature of `Taskwork` is the ability to schedule a task with a certain p
 ## Status
 
 UNSTABLE, IN-PROGRESS
+
+ONLY SUPPORTED IN BROWSER
 
 ## Installation
 

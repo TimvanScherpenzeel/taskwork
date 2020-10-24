@@ -2,7 +2,7 @@
 
 // iOS Safari seems to wrongly GC the worker.
 // Mounting it to the global prevents that from happening.
-(self as any).$$tw = {};
+(window as any).$$tw = {};
 
 // Make sure string arguments are kept as strings
 export const serializeArgs = (args: any[] = []) =>
@@ -47,7 +47,7 @@ export class Thread {
 
     // iOS Safari seems to wrongly GC the worker.
     // Mounting it to the global prevents that from happening.
-    (self as any).$$tw[this.taskId] = this.worker;
+    (window as any).$$tw[this.taskId] = this.worker;
   }
 
   public run(...args: any) {

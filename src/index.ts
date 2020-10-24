@@ -65,7 +65,7 @@ export class Scheduler {
   private deferTasks() {
     if (!this.deferScheduled) {
       this.deferScheduled = true;
-      window?.requestAnimationFrame(this.runTasks);
+      requestAnimationFrame(this.runTasks);
     }
   }
 
