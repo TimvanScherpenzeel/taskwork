@@ -1,9 +1,23 @@
 // Types
 import { Undefinable } from '../types';
 
-type QueueEntry = { priority: number; taskId: number };
+export enum Priorities {
+  ImmediatePriority,
+  HighPriority,
+  NormalPriority,
+  LowPriority,
+}
+
+export type PriorityLevel =
+  | Priorities.ImmediatePriority
+  | Priorities.HighPriority
+  | Priorities.NormalPriority
+  | Priorities.LowPriority
+  | number;
 
 export type StoreEntry = [taskId: number, task: unknown, args: unknown[]];
+
+type QueueEntry = { priority: PriorityLevel; taskId: number };
 
 /**
  * A priority queue implementation based on https://github.com/thi-ng/umbrella/blob/develop/packages/heaps/src/heap.ts
@@ -19,7 +33,7 @@ export class PriorityQueue {
     return this.queue.length;
   }
 
-  public push(priority: number, data: StoreEntry) {
+  public push(priority: PriorityLevel, data: StoreEntry) {
     this.store.set(data[0], data);
     this.queue.push({ priority, taskId: data[0] });
     this.percolateUp(this.queue.length - 1);

@@ -2,24 +2,15 @@
 
 // Internal
 import { Thread, serializeArgs } from './internal/Thread';
-import { PriorityQueue } from './internal/PriorityQueue';
+import {
+  PriorityLevel,
+  PriorityQueue,
+  StoreEntry,
+} from './internal/PriorityQueue';
 
 // Types
-import { StoreEntry } from './internal/PriorityQueue';
 import { Undefinable } from './types';
-
-export type PriorityLevel =
-  | Priorities.ImmediatePriority
-  | Priorities.HighPriority
-  | Priorities.NormalPriority
-  | Priorities.LowPriority;
-
-export enum Priorities {
-  ImmediatePriority,
-  HighPriority,
-  NormalPriority,
-  LowPriority,
-}
+export { PriorityLevel };
 
 export class Scheduler {
   private deferScheduled = false;
