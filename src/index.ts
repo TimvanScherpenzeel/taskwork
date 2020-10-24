@@ -30,7 +30,9 @@ export class Scheduler {
   private frameTarget: number;
   private priorityQueue = new PriorityQueue();
   private taskId = 0;
-  private taskPromises: any = {};
+  private taskPromises: {
+    [k: number]: [(value?: unknown) => void, (reason?: any) => void];
+  } = {};
   private threadCount: number;
 
   constructor({
@@ -68,7 +70,7 @@ export class Scheduler {
   private deferTasks() {
     if (!this.deferScheduled) {
       this.deferScheduled = true;
-      requestAnimationFrame(this.runTasks);
+      window.requestAnimationFrame(this.runTasks);
     }
   }
 
