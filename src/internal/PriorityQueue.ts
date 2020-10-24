@@ -1,3 +1,4 @@
+// Types
 type QueueEntry = { priority: number; taskId: number };
 export type StoreEntry = [taskId: number, task: unknown, args: unknown[]];
 

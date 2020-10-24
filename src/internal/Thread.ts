@@ -1,8 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+// Types
+declare global {
+  interface Window {
+    $$tw: { [k: number]: Worker | null };
+  }
+}
+
 // iOS Safari seems to wrongly GC the worker.
 // Mounting it to the global prevents that from happening.
-(window as any).$$tw = {};
+window.$$tw = {};
 
 // Make sure string arguments are kept as strings
 export const serializeArgs = (args: any[] = []) =>
@@ -47,7 +54,7 @@ export class Thread {
 
     // iOS Safari seems to wrongly GC the worker.
     // Mounting it to the global prevents that from happening.
-    (window as any).$$tw[this.taskId] = this.worker;
+    window.$$tw[this.taskId] = this.worker;
   }
 
   public run(...args: any) {
