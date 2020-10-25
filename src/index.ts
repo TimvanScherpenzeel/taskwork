@@ -71,6 +71,9 @@ export class Scheduler {
   private runTasks() {
     const timeRan = performance.now();
 
+    // Observe executors
+
+    // TODO: replace with observer
     while (true) {
       if (
         this.priorityQueue.length === 0 ||

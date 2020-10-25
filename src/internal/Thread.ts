@@ -29,19 +29,25 @@ export class Thread {
       new Blob([
         `(${() =>
           ((self as any).onmessage = (e: MessageEvent) => {
-            Promise.resolve(Function(`return(${e.data[1]})(${e.data[2]})`)())
-              .then((r) => {
-                (self as any).postMessage(
-                  ['r', r, e.data[0], 0],
-                  [r].filter(
-                    (x: unknown) =>
-                      x instanceof ArrayBuffer ||
-                      x instanceof MessagePort ||
-                      (ImageBitmap && x instanceof ImageBitmap)
-                  )
+            if (e.data[0] === 'h') {
+              setTimeout(() => (self as any).postMessage(['h']), 3000);
+            } else {
+              Promise.resolve(Function(`return(${e.data[1]})(${e.data[2]})`)())
+                .then((r) => {
+                  (self as any).postMessage(
+                    ['r', r, e.data[0], 0],
+                    [r].filter(
+                      (x: unknown) =>
+                        x instanceof ArrayBuffer ||
+                        x instanceof MessagePort ||
+                        (ImageBitmap && x instanceof ImageBitmap)
+                    )
+                  );
+                })
+                .catch((f) =>
+                  (self as any).postMessage(['r', f, e.data[0], 1])
                 );
-              })
-              .catch((f) => (self as any).postMessage(['r', f, e.data[0], 1]));
+            }
           })})()`,
       ])
     )
@@ -49,9 +55,14 @@ export class Thread {
 
   constructor() {
     this.worker?.addEventListener('message', (e: MessageEvent) => {
-      if (e.data[0] === 'r') {
-        this.taskPromises[e.data[2]][e.data[3]](e.data[1]);
-        delete this.taskPromises[e.data[2]];
+      switch (e.data[0]) {
+        case 'h':
+          this.worker?.postMessage(['h']);
+          break;
+        case 'r':
+          this.taskPromises[e.data[2]][e.data[3]](e.data[1]);
+          delete this.taskPromises[e.data[2]];
+          break;
       }
     });
 
@@ -60,6 +71,9 @@ export class Thread {
     window.$$tw[
       `${Math.random().toString(36).substr(2, 8)}-${this.taskId}`
     ] = this.worker;
+
+    // Start heartbeat messaging to worker
+    this.worker?.postMessage(['h']);
   }
 
   public run(...args: any) {
