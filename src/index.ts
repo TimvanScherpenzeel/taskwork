@@ -7,6 +7,7 @@ import {
   PriorityQueue,
   StoreEntry,
 } from './internal/PriorityQueue';
+import { Profiler } from './internal/Profiler';
 import { Thread } from './internal/Thread';
 import { serializeArgs } from './internal/utilities';
 
@@ -28,6 +29,7 @@ export class Scheduler {
     [k: number]: [(value?: unknown) => void, (reason?: any) => void];
   } = {};
   private threadCount: number;
+  private profiler = new Profiler();
 
   constructor({
     frameTarget = 60,
@@ -71,9 +73,6 @@ export class Scheduler {
   private runTasks() {
     const timeRan = performance.now();
 
-    // Observe executors
-
-    // TODO: replace with observer
     while (true) {
       if (
         this.priorityQueue.length === 0 ||
