@@ -7,7 +7,6 @@ import {
   PriorityQueue,
   StoreEntry,
 } from './internal/PriorityQueue';
-import { Profiler } from './internal/Profiler';
 import { Thread } from './internal/Thread';
 import { serializeArgs } from './internal/utilities';
 
@@ -16,29 +15,30 @@ import { Undefinable } from './types';
 export { Priorities };
 
 export class Scheduler {
-  private deferScheduled = false;
   private executors: {
     executorId: number;
     executor: Thread;
     isRunning: boolean;
   }[];
-  private frameTarget: number;
+  private currentTime = 0;
+  private startTime = 0;
+  private frameDelta = 0;
+  private frameCap: number;
   private priorityQueue = new PriorityQueue();
   private taskId = 0;
   private taskPromises: {
     [k: number]: [(value?: unknown) => void, (reason?: any) => void];
   } = {};
   private threadCount: number;
-  private profiler = new Profiler();
 
   constructor({
-    frameTarget = 60,
+    frameCap = 60,
     threadCount = Math.min(Math.max(navigator?.hardwareConcurrency - 1, 2), 4),
   }: {
-    frameTarget?: number;
+    frameCap?: number;
     threadCount?: number;
   } = {}) {
-    this.frameTarget = 1000 / frameTarget;
+    this.frameCap = 1000 / frameCap;
     this.threadCount = threadCount;
 
     this.executors = [...Array(this.threadCount)].map((_, index) => ({
@@ -47,9 +47,11 @@ export class Scheduler {
       isRunning: false,
     }));
 
+    this.startTime = performance.now();
+
     this.runTasks = this.runTasks.bind(this);
 
-    this.deferTasks();
+    this.runTasks();
   }
 
   public addTask(priority: PriorityLevel, task: any, args?: any[]) {
@@ -63,60 +65,47 @@ export class Scheduler {
     });
   }
 
-  private deferTasks() {
-    if (!this.deferScheduled) {
-      this.deferScheduled = true;
-
-      // Could potentially run at 60 fps
-      window.requestAnimationFrame(this.runTasks);
-    }
-  }
-
   private runTasks() {
-    const timeRan = performance.now();
+    window.requestAnimationFrame(this.runTasks);
 
-    while (true) {
-      if (
-        this.priorityQueue.length === 0 ||
-        performance.now() - timeRan > this.frameTarget
-      ) {
-        break;
-      } else {
-        const { executor, executorId } =
-          this.executors.find(({ isRunning }) => isRunning === false) || {};
+    this.currentTime = performance.now();
+    this.frameDelta = this.currentTime - this.startTime;
 
-        if (executor === undefined || executorId === undefined) {
-          return;
-        }
+    if (this.frameDelta > this.frameCap) {
+      this.startTime = this.currentTime - (this.frameDelta % this.frameCap);
 
-        const task: Undefinable<StoreEntry> = this.priorityQueue.pop();
-
-        if (task) {
-          const [taskId, fn, args] = task;
-
-          this.executors[executorId].isRunning = true;
-
-          executor
-            .run(fn, args)
-            .then((response) => {
-              this.taskPromises[taskId][0](response);
-            })
-            .catch((err) => {
-              console.error(err);
-              this.taskPromises[taskId][1](err);
-            })
-            .finally(() => {
-              this.executors[executorId].isRunning = false;
-              delete this.taskPromises[taskId];
-            });
-        }
+      if (this.priorityQueue.length === 0) {
+        return;
       }
-    }
 
-    this.deferScheduled = false;
+      const { executor, executorId } =
+        this.executors.find(({ isRunning }) => isRunning === false) || {};
 
-    if (this.priorityQueue.length > 0) {
-      this.deferTasks();
+      if (executor === undefined || executorId === undefined) {
+        return;
+      }
+
+      const task: Undefinable<StoreEntry> = this.priorityQueue.pop();
+
+      if (task) {
+        const [taskId, fn, args] = task;
+
+        this.executors[executorId].isRunning = true;
+
+        executor
+          .run(fn, args)
+          .then((response) => {
+            this.taskPromises[taskId][0](response);
+          })
+          .catch((err) => {
+            console.error(err);
+            this.taskPromises[taskId][1](err);
+          })
+          .finally(() => {
+            this.executors[executorId].isRunning = false;
+            delete this.taskPromises[taskId];
+          });
+      }
     }
   }
 }
