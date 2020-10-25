@@ -5,42 +5,40 @@ declare global {
 }
 
 export class Profiler {
+  private currentTime = 0;
   private startTime = 0;
   private endTime = 0;
   private frameCount = 0;
-  private frameTime = 0;
+  private frameDelta = 0;
   private framesPerSecond = 0;
   private frameCap = 1000 / 30;
   private requestId = 0;
 
-  // private frameDelta = 0;
-  // private defaultRefreshRate = 60;
-  // private refreshRates = [30, 60, 72, 90, 100, 120, 144, 240];
-
   constructor() {
     this.startTime = performance.now();
     this.update = this.update.bind(this);
-    this.requestId = window.requestAnimationFrame(this.update);
+    this.update();
   }
 
   public update() {
     this.requestId = window.requestAnimationFrame(this.update);
 
-    const time = performance.now();
-    const delta = time - this.startTime;
+    this.currentTime = performance.now();
+    this.frameDelta = this.currentTime - this.startTime;
 
-    if (delta > this.frameCap) {
+    if (this.frameDelta > this.frameCap) {
       this.frameCount++;
-      this.startTime = time - (delta % this.frameCap);
-      this.frameTime = this.startTime;
+      this.startTime = this.currentTime - (this.frameDelta % this.frameCap);
 
-      if (time >= this.endTime + 1000) {
+      if (this.currentTime >= this.endTime + 1000) {
         this.framesPerSecond = Math.round(
-          (this.frameCount * 1000) / (time - this.endTime)
+          (this.frameCount * 1000) / (this.currentTime - this.endTime)
         );
-        this.endTime = time;
+        this.endTime = this.currentTime;
         this.frameCount = 0;
       }
+
+      // Perfrom expensive work
 
       console.log(this.framesPerSecond);
     }
