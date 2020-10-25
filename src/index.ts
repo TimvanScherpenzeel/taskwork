@@ -66,6 +66,8 @@ export class Scheduler {
   private deferTasks() {
     if (!this.deferScheduled) {
       this.deferScheduled = true;
+
+      // Could potentially run at 60 fps
       window.requestAnimationFrame(this.runTasks);
     }
   }

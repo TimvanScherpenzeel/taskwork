@@ -1,9 +1,3 @@
-declare global {
-  interface Performance {
-    memory: { usedJSHeapSize: number };
-  }
-}
-
 export class Profiler {
   private currentTime = 0;
   private startTime = 0;
@@ -12,7 +6,6 @@ export class Profiler {
   private frameDelta = 0;
   private framesPerSecond = 0;
   private frameCap = 1000 / 30;
-  private requestId = 0;
 
   constructor() {
     this.startTime = performance.now();
@@ -21,7 +14,7 @@ export class Profiler {
   }
 
   public update() {
-    this.requestId = window.requestAnimationFrame(this.update);
+    window.requestAnimationFrame(this.update);
 
     this.currentTime = performance.now();
     this.frameDelta = this.currentTime - this.startTime;
@@ -42,9 +35,5 @@ export class Profiler {
 
       console.log(this.framesPerSecond);
     }
-  }
-
-  public stop() {
-    window.cancelAnimationFrame(this.requestId);
   }
 }
