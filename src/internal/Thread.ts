@@ -52,7 +52,6 @@ export class Thread {
       }
     });
 
-    // Start heartbeat messaging to worker
     this.worker?.postMessage(['h']);
   }
 
