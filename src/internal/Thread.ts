@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 // Internal
 import { serializeArgs } from './utilities';
 
@@ -12,6 +10,7 @@ import { Nullable } from '../types';
 export class Thread {
   private taskId = 0;
   private taskPromises: {
+    /* eslint-disable @typescript-eslint/no-explicit-any */
     [k: number]: [(value?: unknown) => void, (reason?: any) => void];
   } = {};
   private worker: Nullable<Worker> = new Worker(

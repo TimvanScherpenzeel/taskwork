@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 // Internal
 import {
   Priorities,
@@ -31,6 +29,7 @@ export class Scheduler {
   private priorityQueue = new PriorityQueue();
   private taskId = 0;
   private taskPromises: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [k: number]: [(value?: unknown) => void, (reason?: any) => void];
   } = {};
   private threadCount: number;
@@ -56,6 +55,7 @@ export class Scheduler {
     this.runTasks();
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public addTask(priority: PriorityLevel, task: any, args?: any[]) {
     return new Promise((resolve, reject) => {
       this.taskPromises[++this.taskId] = [resolve, reject];
