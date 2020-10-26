@@ -20,10 +20,8 @@ export class Scheduler {
     executor: Thread;
     isRunning: boolean;
   }[];
-  private currentTime = 0;
-  private startTime = 0;
-  private frameDelta = 0;
-  private frameCap: number;
+  private frameStart = 0;
+  private frameRate = 0;
   private priorityQueue = new PriorityQueue();
   private taskId = 0;
   private taskPromises: {
@@ -32,13 +30,10 @@ export class Scheduler {
   private threadCount: number;
 
   constructor({
-    frameCap = 60,
     threadCount = Math.min(Math.max(navigator?.hardwareConcurrency - 1, 2), 4),
   }: {
-    frameCap?: number;
     threadCount?: number;
   } = {}) {
-    this.frameCap = 1000 / frameCap;
     this.threadCount = threadCount;
 
     this.executors = [...Array(this.threadCount)].map((_, index) => ({
@@ -46,8 +41,6 @@ export class Scheduler {
       executorId: index,
       isRunning: false,
     }));
-
-    this.startTime = performance.now();
 
     this.runTasks = this.runTasks.bind(this);
 
@@ -68,43 +61,43 @@ export class Scheduler {
   private runTasks() {
     window.requestAnimationFrame(this.runTasks);
 
-    this.currentTime = performance.now();
-    this.frameDelta = this.currentTime - this.startTime;
+    this.frameStart = performance.now();
 
-    if (this.frameDelta > this.frameCap) {
-      this.startTime = this.currentTime - (this.frameDelta % this.frameCap);
+    while (true) {
+      if (
+        this.priorityQueue.length === 0 ||
+        performance.now() > this.frameStart + 1000 / 60
+      ) {
+        break;
+      } else {
+        const { executor, executorId } =
+          this.executors.find(({ isRunning }) => isRunning === false) || {};
 
-      if (this.priorityQueue.length === 0) {
-        return;
-      }
+        if (executor === undefined || executorId === undefined) {
+          break;
+        }
 
-      const { executor, executorId } =
-        this.executors.find(({ isRunning }) => isRunning === false) || {};
+        const task: Undefinable<StoreEntry> = this.priorityQueue.pop();
 
-      if (executor === undefined || executorId === undefined) {
-        return;
-      }
+        if (task) {
+          const [taskId, fn, args] = task;
 
-      const task: Undefinable<StoreEntry> = this.priorityQueue.pop();
+          this.executors[executorId].isRunning = true;
 
-      if (task) {
-        const [taskId, fn, args] = task;
-
-        this.executors[executorId].isRunning = true;
-
-        executor
-          .run(fn, args)
-          .then((response) => {
-            this.taskPromises[taskId][0](response);
-          })
-          .catch((err) => {
-            console.error(err);
-            this.taskPromises[taskId][1](err);
-          })
-          .finally(() => {
-            this.executors[executorId].isRunning = false;
-            delete this.taskPromises[taskId];
-          });
+          executor
+            .run(fn, args)
+            .then((response) => {
+              this.taskPromises[taskId][0](response);
+            })
+            .catch((err) => {
+              console.error(err);
+              this.taskPromises[taskId][1](err);
+            })
+            .finally(() => {
+              this.executors[executorId].isRunning = false;
+              delete this.taskPromises[taskId];
+            });
+        }
       }
     }
   }

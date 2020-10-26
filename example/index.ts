@@ -2,14 +2,14 @@
 
 import { Priorities, Scheduler } from '../src';
 
-const scheduler = new Scheduler({ frameCap: 5 });
+const scheduler = new Scheduler();
 
 const getUser = async (username: string) => {
   // const url = `https://api.github.com/users/${username}`;
   // const res = await fetch(url);
   // const profile = await res.json();
   // return profile.name;
-  return username;
+  return new Promise((resolve) => setTimeout(() => resolve(username)));
 };
 
 (async () => {
@@ -22,12 +22,24 @@ const getUser = async (username: string) => {
   //   console.log(response);
   // });
 
-  for (let i = 0; i < 100; i++) {
-    const a = await scheduler.addTask(Priorities.LowPriority, getUser, [
-      'developit',
+  for (let i = 0; i < 10; i++) {
+    const a = await scheduler.addTask(Priorities.ImmediatePriority, getUser, [
+      'a',
     ]);
 
-    console.log(a);
+    const b = await scheduler.addTask(Priorities.ImmediatePriority, getUser, [
+      'b',
+    ]);
+
+    const c = await scheduler.addTask(Priorities.ImmediatePriority, getUser, [
+      'c',
+    ]);
+
+    const d = await scheduler.addTask(Priorities.ImmediatePriority, getUser, [
+      'd',
+    ]);
+
+    console.log(a, b, c, d);
   }
 
   // const b = scheduler.addTask(Priorities.ImmediatePriority, getUser, [
