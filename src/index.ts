@@ -17,11 +17,6 @@ export class Scheduler {
   private captureEnd = 0;
   private captureLength = 10;
   private captureFrames: number[] = Array(this.captureLength).fill(60);
-  private threads: {
-    threadId: number;
-    thread: Thread;
-    isRunning: boolean;
-  }[];
   private frameBudget = 1.0;
   private frameCount = 0;
   private frameRate = 60.0;
@@ -32,6 +27,11 @@ export class Scheduler {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [k: number]: [(value?: unknown) => void, (reason?: any) => void];
   } = {};
+  private threads: {
+    isRunning: boolean;
+    thread: Thread;
+    threadId: number;
+  }[];
   private threadCount: number;
 
   constructor({
