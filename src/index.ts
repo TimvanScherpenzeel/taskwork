@@ -15,13 +15,18 @@ import { Undefinable } from './types';
 export { Priorities };
 
 export class Scheduler {
+  private captureStart = 0;
+  private captureEnd = 0;
+  private captureLength = 5;
+  private captureFrames: number[] = Array(this.captureLength).fill(60);
   private executors: {
     executorId: number;
     executor: Thread;
     isRunning: boolean;
   }[];
-  private frameStart = 0;
-  private frameRate = 0;
+  private frameCount = 0;
+  private frameRate = 60;
+  private frameRateAverage = 0;
   private priorityQueue = new PriorityQueue();
   private taskId = 0;
   private taskPromises: {
@@ -61,12 +66,26 @@ export class Scheduler {
   private runTasks() {
     window.requestAnimationFrame(this.runTasks);
 
-    this.frameStart = performance.now();
+    this.captureStart = performance.now();
+    this.frameCount++;
+
+    if (this.captureStart >= this.captureEnd + 1000) {
+      this.frameRate = Math.round(
+        (this.frameCount * 1000) / (this.captureStart - this.captureEnd)
+      );
+      this.captureFrames.shift();
+      this.captureFrames.push(this.frameRate);
+      this.frameRateAverage =
+        this.captureFrames.reduce((a, b) => a + b) / this.captureLength;
+
+      this.captureEnd = this.captureStart;
+      this.frameCount = 0;
+    }
 
     while (true) {
       if (
         this.priorityQueue.length === 0 ||
-        performance.now() > this.frameStart + 1000 / 60
+        performance.now() > this.captureStart + 1000 / this.frameRateAverage
       ) {
         break;
       } else {
