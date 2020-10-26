@@ -1,9 +1,6 @@
 // Internal
 import { serializeArgs } from './utilities';
 
-// Types
-import { Nullable } from '../types';
-
 /**
  * A re-usable thread implementation based on https://github.com/developit/greenlet and https://github.com/developit/task-worklet
  */
@@ -13,7 +10,7 @@ export class Thread {
     /* eslint-disable @typescript-eslint/no-explicit-any */
     [k: number]: [(value?: unknown) => void, (reason?: any) => void];
   } = {};
-  private worker: Nullable<Worker> = new Worker(
+  private worker = new Worker(
     URL.createObjectURL(
       new Blob([
         `(${() =>
@@ -60,10 +57,6 @@ export class Thread {
   }
 
   public run(...args: any) {
-    if (this.worker === null) {
-      throw new Error('Worker is not active anymore');
-    }
-
     return new Promise((resolve, reject) => {
       this.taskPromises[++this.taskId] = [resolve, reject];
 
