@@ -77,7 +77,6 @@ export class Scheduler {
       this.captureFrames.push(this.frameRate);
       this.frameRateAverage =
         this.captureFrames.reduce((a, b) => a + b) / this.captureLength;
-
       this.captureEnd = this.captureStart;
       this.frameCount = 0;
     }
