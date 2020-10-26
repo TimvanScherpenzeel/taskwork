@@ -17,16 +17,17 @@ export { Priorities };
 export class Scheduler {
   private captureStart = 0;
   private captureEnd = 0;
-  private captureLength = 5;
+  private captureLength = 10;
   private captureFrames: number[] = Array(this.captureLength).fill(60);
   private executors: {
     executorId: number;
     executor: Thread;
     isRunning: boolean;
   }[];
+  private frameBudget = 1.0;
   private frameCount = 0;
-  private frameRate = 60;
-  private frameRateAverage = 0;
+  private frameRate = 60.0;
+  private frameRateAverage = 0.0;
   private priorityQueue = new PriorityQueue();
   private taskId = 0;
   private taskPromises: {
@@ -35,10 +36,13 @@ export class Scheduler {
   private threadCount: number;
 
   constructor({
+    frameBudget = 1.0,
     threadCount = Math.min(Math.max(navigator?.hardwareConcurrency - 1, 2), 4),
   }: {
+    frameBudget?: number;
     threadCount?: number;
   } = {}) {
+    this.frameBudget = frameBudget;
     this.threadCount = threadCount;
 
     this.executors = [...Array(this.threadCount)].map((_, index) => ({
@@ -84,7 +88,8 @@ export class Scheduler {
     while (true) {
       if (
         this.priorityQueue.length === 0 ||
-        performance.now() > this.captureStart + 1000 / this.frameRateAverage
+        performance.now() >
+          this.captureStart + (1000 / this.frameRateAverage) * this.frameBudget
       ) {
         break;
       } else {
