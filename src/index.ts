@@ -17,9 +17,9 @@ export class Scheduler {
   private captureEnd = 0;
   private captureLength = 10;
   private captureFrames: number[] = Array(this.captureLength).fill(60);
-  private executors: {
-    executorId: number;
-    executor: Thread;
+  private threads: {
+    threadId: number;
+    thread: Thread;
     isRunning: boolean;
   }[];
   private frameBudget = 1.0;
@@ -44,10 +44,10 @@ export class Scheduler {
     this.frameBudget = frameBudget;
     this.threadCount = threadCount;
 
-    this.executors = [...Array(this.threadCount)].map((_, index) => ({
-      executor: new Thread(),
-      executorId: index,
+    this.threads = [...Array(this.threadCount)].map((_, index) => ({
       isRunning: false,
+      thread: new Thread(),
+      threadId: index,
     }));
 
     this.runTasks = this.runTasks.bind(this);
@@ -93,10 +93,10 @@ export class Scheduler {
       ) {
         break;
       } else {
-        const { executor, executorId } =
-          this.executors.find(({ isRunning }) => isRunning === false) || {};
+        const { thread, threadId } =
+          this.threads.find(({ isRunning }) => isRunning === false) || {};
 
-        if (executor === undefined || executorId === undefined) {
+        if (thread === undefined || threadId === undefined) {
           break;
         }
 
@@ -105,9 +105,9 @@ export class Scheduler {
         if (task) {
           const [taskId, fn, args] = task;
 
-          this.executors[executorId].isRunning = true;
+          this.threads[threadId].isRunning = true;
 
-          executor
+          thread
             .run(fn, args)
             .then((response) => {
               this.taskPromises[taskId][0](response);
@@ -117,7 +117,7 @@ export class Scheduler {
               this.taskPromises[taskId][1](err);
             })
             .finally(() => {
-              this.executors[executorId].isRunning = false;
+              this.threads[threadId].isRunning = false;
               delete this.taskPromises[taskId];
             });
         }

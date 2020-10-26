@@ -44,11 +44,11 @@ const scheduler = new Scheduler({
 });
 
 async () => {
-  // Gets executed on first executor, returns a Promise<result>
+  // Gets executed on first thread, returns a Promise<result>
   const taskAp = scheduler.addTask(Priorities.LowPriority, getUser, [
     'microsoft',
   ]);
-  // Gets executed on second executor, returns a Promise<result>
+  // Gets executed on second thread, returns a Promise<result>
   const taskBp = scheduler.addTask(Priorities.ImmediatePriority, getUser, [
     'timvanscherpenzeel',
   ]);
