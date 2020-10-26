@@ -39,7 +39,7 @@ const getUser = async (username: string) => {
 };
 
 const scheduler = new Scheduler({
-  frameTarget?: number; // (Default, 60) Time available per frame to execute tasks
+  frameBudget?: number; // (Default, 1.0) Percentage of frame budget to allow for task execution
   threadCount?: number; // (Default, 2 - 4 depending on CPU architecture) Amount of threads to spawn
 });
 
