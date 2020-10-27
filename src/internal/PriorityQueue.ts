@@ -1,3 +1,4 @@
+// Types
 export enum Priorities {
   ImmediatePriority,
   HighPriority,

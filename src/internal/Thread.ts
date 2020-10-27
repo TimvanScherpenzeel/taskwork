@@ -1,5 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+// Types
+export type TaskPromises = {
+  [k: number]: [(value?: unknown) => void, (reason?: any) => void];
+};
+
 /**
  * A re-usable thread implementation based on https://github.com/developit/greenlet and https://github.com/developit/task-worklet
  */
@@ -8,10 +13,7 @@ export class Thread {
     args.map((m: unknown) => (typeof m === 'string' ? JSON.stringify(m) : m));
 
   private taskId = 0;
-  private taskPromises: {
-    /* eslint-disable @typescript-eslint/no-explicit-any */
-    [k: number]: [(value?: unknown) => void, (reason?: any) => void];
-  } = {};
+  private taskPromises: TaskPromises = {};
   private worker = new Worker(
     URL.createObjectURL(
       new Blob([

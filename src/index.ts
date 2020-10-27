@@ -8,6 +8,7 @@ import {
 import { Thread } from './internal/Thread';
 
 // Types
+import type { TaskPromises } from './internal/Thread';
 export { Priorities };
 
 export class Scheduler {
@@ -24,10 +25,7 @@ export class Scheduler {
   private frameRateAverage = 0.0;
   private priorityQueue = new PriorityQueue();
   private taskId = 0;
-  private taskPromises: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    [k: number]: [(value?: unknown) => void, (reason?: any) => void];
-  } = {};
+  private taskPromises: TaskPromises = {};
   private threads: {
     isRunning: boolean;
     thread: Thread;
