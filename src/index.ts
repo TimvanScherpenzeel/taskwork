@@ -1,13 +1,13 @@
 // Internal
-import {
-  Priorities,
-  PriorityLevel,
-  PriorityQueue,
-  StoreEntry,
-} from './internal/PriorityQueue';
+import { PriorityQueue } from './internal/PriorityQueue';
 import { Thread } from './internal/Thread';
 
 // Types
+import type {
+  Priorities,
+  PriorityLevel,
+  StoreEntry,
+} from './internal/PriorityQueue';
 import type { TaskPromises } from './internal/Thread';
 export { Priorities };
 
