@@ -6,10 +6,8 @@ import {
   StoreEntry,
 } from './internal/PriorityQueue';
 import { Thread } from './internal/Thread';
-import { serializeArgs } from './internal/utilities';
 
 // Types
-import { Undefinable } from './types';
 export { Priorities };
 
 export class Scheduler {
@@ -17,7 +15,10 @@ export class Scheduler {
   private captureEnd = 0;
   private captureLength = 10;
   private captureFrames: number[] = Array(this.captureLength).fill(60);
-  private frameBudget = 1.0;
+
+  // Reserve 30% of the frame budget to the browser (4-6 ms at 60 fps)
+  private frameBudget = 0.7;
+
   private frameCount = 0;
   private frameRate = 60.0;
   private frameRateAverage = 0.0;
@@ -35,7 +36,7 @@ export class Scheduler {
   private threadCount: number;
 
   constructor({
-    frameBudget = 1.0,
+    frameBudget = 0.7,
     threadCount = Math.min(Math.max(navigator?.hardwareConcurrency - 1, 2), 4),
   }: {
     frameBudget?: number;
@@ -62,7 +63,7 @@ export class Scheduler {
       this.priorityQueue.push(priority, [
         this.taskId,
         task,
-        serializeArgs(args),
+        Thread.serializeArgs(args),
       ]);
     });
   }
@@ -100,7 +101,7 @@ export class Scheduler {
           break;
         }
 
-        const task: Undefinable<StoreEntry> = this.priorityQueue.pop();
+        const task: StoreEntry | undefined = this.priorityQueue.pop();
 
         if (task) {
           const [taskId, fn, args] = task;

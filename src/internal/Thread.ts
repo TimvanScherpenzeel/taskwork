@@ -1,10 +1,12 @@
-// Internal
-import { serializeArgs } from './utilities';
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 /**
  * A re-usable thread implementation based on https://github.com/developit/greenlet and https://github.com/developit/task-worklet
  */
 export class Thread {
+  public static serializeArgs = (args: any[] = []) =>
+    args.map((m: unknown) => (typeof m === 'string' ? JSON.stringify(m) : m));
+
   private taskId = 0;
   private taskPromises: {
     /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -62,7 +64,7 @@ export class Thread {
       const fn = args.shift();
 
       this.worker?.postMessage(
-        [this.taskId, fn.toString(), serializeArgs(args)],
+        [this.taskId, fn.toString(), Thread.serializeArgs(args)],
         [args].filter(
           (x: unknown) =>
             x instanceof ArrayBuffer ||

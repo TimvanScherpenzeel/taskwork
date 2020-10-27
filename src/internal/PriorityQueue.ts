@@ -1,6 +1,3 @@
-// Types
-import { Undefinable } from '../types';
-
 export enum Priorities {
   ImmediatePriority,
   HighPriority,
@@ -51,7 +48,7 @@ export class PriorityQueue {
       entry = tail;
     }
 
-    const data: Undefinable<StoreEntry> = this.store.get(entry.taskId);
+    const data: StoreEntry | undefined = this.store.get(entry.taskId);
     this.store.delete(entry.taskId);
 
     return data;
