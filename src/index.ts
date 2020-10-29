@@ -1,15 +1,11 @@
 // Internal
-import { PriorityQueue } from './internal/PriorityQueue';
+import { Priorities, PriorityQueue } from './internal/PriorityQueue';
 import { Thread } from './internal/Thread';
+export { Priorities };
 
 // Types
-import type {
-  Priorities,
-  PriorityLevel,
-  StoreEntry,
-} from './internal/PriorityQueue';
+import type { PriorityLevel, StoreEntry } from './internal/PriorityQueue';
 import type { TaskPromises } from './internal/Thread';
-export { Priorities };
 
 export class Scheduler {
   private captureStart = 0;

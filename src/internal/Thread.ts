@@ -19,24 +19,28 @@ export class Thread {
       new Blob([
         `(${() =>
           ((self as any).onmessage = (e: MessageEvent) => {
-            if (e.data[0] === 'h') {
-              setTimeout(() => (self as any).postMessage(['h']), 3000);
-            } else {
-              Promise.resolve(Function(`return(${e.data[1]})(${e.data[2]})`)())
-                .then((r) => {
-                  (self as any).postMessage(
-                    ['r', r, e.data[0], 0],
-                    [r].filter(
-                      (x: unknown) =>
-                        x instanceof ArrayBuffer ||
-                        x instanceof MessagePort ||
-                        (ImageBitmap && x instanceof ImageBitmap)
-                    )
+            switch (e.data[0]) {
+              case 'h':
+                setTimeout(() => (self as any).postMessage(['h']), 3000);
+                break;
+              case 't':
+                Promise.resolve(
+                  Function(`return(${e.data[2]})(${e.data[3]})`)()
+                )
+                  .then((r) => {
+                    (self as any).postMessage(
+                      ['r', r, e.data[1], 0],
+                      [r].filter(
+                        (x: unknown) =>
+                          x instanceof ArrayBuffer ||
+                          x instanceof MessagePort ||
+                          (ImageBitmap && x instanceof ImageBitmap)
+                      )
+                    );
+                  })
+                  .catch((f) =>
+                    (self as any).postMessage(['r', f, e.data[1], 1])
                   );
-                })
-                .catch((f) =>
-                  (self as any).postMessage(['r', f, e.data[0], 1])
-                );
             }
           })})()`,
       ])
@@ -66,7 +70,7 @@ export class Thread {
       const fn = args.shift();
 
       this.worker?.postMessage(
-        [this.taskId, fn.toString(), Thread.serializeArgs(args)],
+        ['t', this.taskId, fn.toString(), Thread.serializeArgs(args)],
         [args].filter(
           (x: unknown) =>
             x instanceof ArrayBuffer ||
